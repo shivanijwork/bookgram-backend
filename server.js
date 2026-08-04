@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+const bookRoutes = require("./routes/bookRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 dotenv.config({ quiet: true });
@@ -18,6 +19,7 @@ app.set("trust proxy", 1);
 app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000", credentials: true }));
 app.use(express.json({ limit: "100kb" }));
 app.use("/api/users", userRoutes);
+app.use("/api/books", bookRoutes);
 
 app.get("/", (req, res) => res.send("Bookgram API running"));
 app.use(notFound);
