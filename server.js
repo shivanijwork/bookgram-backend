@@ -10,8 +10,25 @@ dotenv.config({ quiet: true });
 
 const app = express();
 
+const normalizeOrigin = (value) => {
+  const origin = value.trim().replace(/\/+$/, "");
+  return /^https?:\/\//i.test(origin) ? origin : `https://${origin}`;
+};
+
+const allowedFrontendOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
+  .split(",")
+  .map(normalizeOrigin);
+
 app.set("trust proxy", 1);
-app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000", credentials: true }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedFrontendOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Origin is not allowed by CORS"));
+  },
+  credentials: true,
+}));
 // Spine photos are sent as compact data URLs so the app can accept uploads
 // without requiring a separate cloud-storage account.
 app.use(express.json({ limit: "4mb" }));
