@@ -17,7 +17,9 @@ const app = express();
 
 app.set("trust proxy", 1);
 app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000", credentials: true }));
-app.use(express.json({ limit: "100kb" }));
+// Spine photos are sent as compact data URLs so the app can accept uploads
+// without requiring a separate cloud-storage account.
+app.use(express.json({ limit: "4mb" }));
 app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
 

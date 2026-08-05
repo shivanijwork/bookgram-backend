@@ -19,6 +19,7 @@ const bookSchema = new mongoose.Schema(
     },
     coverUrl: { type: String, trim: true, maxlength: 2048, default: "" },
     coverPublicId: { type: String, select: false, default: null },
+    spineImage: { type: String, maxlength: 3000000, default: "" },
     rating: { type: Number, min: 1, max: 5, default: null },
     notes: { type: String, trim: true, maxlength: 5000, default: "" },
   },

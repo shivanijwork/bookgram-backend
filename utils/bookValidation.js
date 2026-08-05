@@ -1,4 +1,4 @@
-const BOOK_FIELDS = ["title", "author", "genre", "tags", "status", "coverUrl", "rating", "notes"];
+const BOOK_FIELDS = ["title", "author", "genre", "tags", "status", "coverUrl", "spineImage", "rating", "notes"];
 const STATUSES = ["tbr", "reading", "read"];
 
 const cleanString = (value) => typeof value === "string" ? value.trim() : value;
@@ -12,6 +12,8 @@ const isHttpUrl = (value) => {
     return false;
   }
 };
+
+const isImageDataUrl = (value) => typeof value === "string" && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/=]+$/i.test(value);
 
 const normalizeTags = (tags) => {
   if (!Array.isArray(tags)) return tags;
@@ -29,6 +31,7 @@ const normalizeBookInput = (input = {}) => {
   BOOK_FIELDS.forEach((field) => {
     if (!Object.prototype.hasOwnProperty.call(input, field)) return;
     if (["title", "author", "genre", "coverUrl", "notes"].includes(field)) output[field] = cleanString(input[field]);
+    else if (field === "spineImage") output.spineImage = input.spineImage;
     else if (field === "tags") output.tags = normalizeTags(input.tags);
     else if (field === "rating") output.rating = input.rating === "" || input.rating === null ? null : Number(input.rating);
     else output[field] = input[field];
@@ -59,6 +62,8 @@ const validateBookInput = (input, { partial = false } = {}) => {
   }
   if (has("status") && !STATUSES.includes(input.status)) errors.push({ field: "status", message: "Choose TBR, Reading, or Read" });
   if (has("coverUrl") && (typeof input.coverUrl !== "string" || input.coverUrl.length > 2048 || !isHttpUrl(input.coverUrl))) errors.push({ field: "coverUrl", message: "Enter a valid HTTP or HTTPS image URL" });
+  if (!partial && (!input.spineImage || !isImageDataUrl(input.spineImage))) errors.push({ field: "spineImage", message: "Upload a JPG, PNG, or WebP photo of the book spine" });
+  if (has("spineImage") && input.spineImage && (!isImageDataUrl(input.spineImage) || input.spineImage.length > 3000000)) errors.push({ field: "spineImage", message: "Use a JPG, PNG, or WebP spine image smaller than 2 MB" });
   if (has("rating") && input.rating !== null && (!Number.isInteger(Number(input.rating)) || Number(input.rating) < 1 || Number(input.rating) > 5)) errors.push({ field: "rating", message: "Rating must be a whole number from 1 to 5" });
   if (has("notes") && (typeof input.notes !== "string" || input.notes.length > 5000)) errors.push({ field: "notes", message: "Notes cannot exceed 5000 characters" });
 
