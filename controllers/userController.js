@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ status: false, message: "Email and password are required", errors: [] });
     }
 
-    const user = await User.findOne({ email, deletedAt: null }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ status: false, message: "Invalid email or password", errors: [] });
     }

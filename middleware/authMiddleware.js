@@ -8,7 +8,7 @@ exports.protect = async (req, res, next) => {
     if (!token) return res.status(401).json({ status: false, message: "Authentication required", errors: [] });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({ _id: payload.userId, deletedAt: null });
+    const user = await User.findById(payload.userId);
     if (!user) return res.status(401).json({ status: false, message: "Your session is no longer valid", errors: [] });
 
     req.user = user;
