@@ -27,7 +27,6 @@ app.use(cors({
     }
     return callback(new Error("Origin is not allowed by CORS"));
   },
-  credentials: true,
 }));
 // Spine photos are sent as compact data URLs so the app can accept uploads
 // without requiring a separate cloud-storage account.

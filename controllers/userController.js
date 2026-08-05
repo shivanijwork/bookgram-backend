@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const { setAuthCookie, clearAuthCookie } = require("../utils/auth");
+const { createToken } = require("../utils/auth");
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -34,8 +34,8 @@ exports.register = async (req, res, next) => {
       password,
     });
 
-    setAuthCookie(res, user);
-    return res.status(201).json({ status: true, message: "Account created successfully", data: { user: user.toSafeObject() } });
+    const token = createToken(user);
+    return res.status(201).json({ status: true, message: "Account created successfully", data: { user: user.toSafeObject(), token } });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({ status: false, message: "An account with these details already exists", errors: [] });
@@ -57,16 +57,11 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ status: false, message: "Invalid email or password", errors: [] });
     }
 
-    setAuthCookie(res, user);
-    return res.json({ status: true, message: "Login successful", data: { user: user.toSafeObject() } });
+    const token = createToken(user);
+    return res.json({ status: true, message: "Login successful", data: { user: user.toSafeObject(), token } });
   } catch (error) {
     return next(error);
   }
-};
-
-exports.logout = (req, res) => {
-  clearAuthCookie(res);
-  return res.json({ status: true, message: "Logged out successfully", data: null });
 };
 
 exports.me = (req, res) => res.json({

@@ -1,15 +1,10 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { COOKIE_NAME } = require("../utils/auth");
-
-const readCookie = (header = "", name) => {
-  const cookie = header.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${name}=`));
-  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : null;
-};
 
 exports.protect = async (req, res, next) => {
   try {
-    const token = readCookie(req.headers.cookie, COOKIE_NAME);
+    const authorization = req.get("authorization") || "";
+    const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
     if (!token) return res.status(401).json({ status: false, message: "Authentication required", errors: [] });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
