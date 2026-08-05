@@ -8,11 +8,6 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 dotenv.config({ quiet: true });
 
-if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
-  console.error("MONGO_URI and JWT_SECRET environment variables are required");
-  process.exit(1);
-}
-
 const app = express();
 
 app.set("trust proxy", 1);
@@ -20,6 +15,14 @@ app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000", cred
 // Spine photos are sent as compact data URLs so the app can accept uploads
 // without requiring a separate cloud-storage account.
 app.use(express.json({ limit: "4mb" }));
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
 
@@ -36,4 +39,6 @@ const startServer = async () => {
 
 if (require.main === module) startServer();
 
-module.exports = { app, startServer };
+// Vercel expects the Express app itself to be the exported function.
+module.exports = app;
+module.exports.startServer = startServer;
